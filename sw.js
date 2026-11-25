@@ -107,6 +107,23 @@ self.addEventListener('fetch', function (event) {
   if (full.indexOf(PREFIX + '/') !== 0 && /^\/(ainzy-web|ainzy-assets|media|data|logo|favicon)/.test(full)) {
     event.respondWith(fetch(PREFIX + full + url.search)); return;
   }
+  // JS/CSS chunk 缓存优先：GitHub Pages 大 chunk 在弱网下慢，缓存后秒开，避免 ChunkLoadError 鬼页面。
+  // cache key 去掉查询串，带 ?ainzy_retry=1 的重试也能命中缓存。
+  if (/\/static\/(js|css)\/.*\.(js|css)($|\?)/.test(full)) {
+    var cacheKey = req.url.split('?')[0];
+    event.respondWith(
+      caches.open('mobai-chunks-v1').then(function (cache) {
+        return cache.match(cacheKey).then(function (hit) {
+          if (hit) return hit;
+          return fetch(req).then(function (resp) {
+            if (resp && resp.ok) { try { cache.put(cacheKey, resp.clone()); } catch (e) {} }
+            return resp;
+          });
+        });
+      })
+    );
+    return;
+  }
   // 其余交回网络（含 /mobai/xxx 真实静态文件、SPA 深链）
   // 注意：静态资源（wasm/riv/字体）不拦截，交给浏览器原生取，避免 ReadableStream 在 sandbox iframe 下失效
 });
