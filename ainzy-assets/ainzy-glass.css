@@ -1,0 +1,202 @@
+/* ainzy.net 控制台磨砂玻璃层
+   注入方式：Apache mod_substitute 在 </head> 前插 <link>（见 post_virtualhost_global.conf 的 apex :443 vhost）
+   ⚠️ 同一个 vhost 下 /media/home.html 也是 text/html，会被一起注入，
+      所以整份规则统一挂在 html.font-inter 下（new-api 的 React 根节点固定带这个 class，
+      light/dark 都有；home.html 没有），保证只对控制台生效。
+   原则：只加 background / backdrop-filter / box-shadow，不碰任何布局属性；
+        选择器包在 :where() 里把特异性压到 0，Tailwind 显式写的 bg-* 永远赢，改不坏现有配色。 */
+
+/* 1) 给页面底色加一层极淡的环境光，玻璃背后才有东西可以糊 */
+html.font-inter body{
+  background-image:
+    radial-gradient(900px 620px at 14% -12%, color-mix(in srgb, var(--foreground) 7%, transparent), transparent 70%),
+    radial-gradient(760px 520px at 96% 6%,  color-mix(in srgb, var(--foreground) 5%, transparent), transparent 72%);
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+}
+
+@supports ((backdrop-filter: blur(2px)) or (-webkit-backdrop-filter: blur(2px))){
+
+  /* 2) 大圆角 + 有边框的容器 = 卡片/面板。
+        刻意不含 rounded-lg / rounded-md，那两个尺寸在这套 UI 里主要是按钮和输入框，糊掉会显脏。 */
+  html.font-inter :where([class~='rounded-xl'],[class~='rounded-2xl'],[class~='rounded-3xl'])[class~='border']{
+    background-image: linear-gradient(157deg, color-mix(in srgb, var(--foreground) 5%, transparent) 0%, transparent 58%);
+    background-color: color-mix(in srgb, var(--card) 55%, transparent);
+    -webkit-backdrop-filter: blur(16px) saturate(150%);
+    backdrop-filter: blur(16px) saturate(150%);
+    box-shadow: inset 0 1px 0 color-mix(in srgb, var(--foreground) 8%, transparent);
+  }
+
+  /* 3) 语义化表面：卡片、气泡、下拉、弹窗、侧边栏 */
+  html.font-inter :where(.bg-card,.bg-popover,[data-slot='card'],[data-slot='popover-content'],[data-slot='dropdown-menu-content']){
+    background-color: color-mix(in srgb, var(--card) 62%, transparent);
+    -webkit-backdrop-filter: blur(18px) saturate(150%);
+    backdrop-filter: blur(18px) saturate(150%);
+  }
+  html.font-inter :where([role='dialog'],[data-radix-popper-content-wrapper] > *){
+    -webkit-backdrop-filter: blur(20px) saturate(150%);
+    backdrop-filter: blur(20px) saturate(150%);
+  }
+  html.font-inter :where([data-slot='sidebar-container'],[data-sidebar='sidebar'],aside){
+    background-color: color-mix(in srgb, var(--sidebar, var(--card)) 68%, transparent);
+    -webkit-backdrop-filter: blur(18px) saturate(140%);
+    backdrop-filter: blur(18px) saturate(140%);
+  }
+
+  /* 4) sticky 顶栏（模型广场那个 header 是 pointer-events:none 的透明壳，
+        真正画出来的条带走规则 2，这里补的是控制台里真正吸顶的那种） */
+  html.font-inter :where(header[class*='sticky'],nav[class*='sticky']){
+    background-color: color-mix(in srgb, var(--background) 62%, transparent);
+    -webkit-backdrop-filter: blur(16px) saturate(150%);
+    backdrop-filter: blur(16px) saturate(150%);
+  }
+}
+
+/* 页头 logo：不裁圆角；暗色主题提亮（logo 为深灰渐变） */
+img[src*="/logo.png"]{border-radius:0!important;object-fit:contain!important}
+html.dark img[src*="/logo.png"]{filter:invert(.92) brightness(1.05)}
+
+/* ainzy-redeem-input: 钱包页兑换码输入框加浅灰底，避免和白色卡片融在一起 */
+#redemption-code{background-color:#f4f4f5!important;border-color:#e4e4e7!important}
+#redemption-code::placeholder{color:#8e8e96}
+#redemption-code:focus-visible{background-color:#fff!important;border-color:#b8943f!important;box-shadow:0 0 0 3px rgba(184,148,63,.18)!important}
+html.dark #redemption-code{background-color:#1c1c1f!important;border-color:#3f3f46!important}
+html.dark #redemption-code:focus-visible{background-color:#0f0f10!important}
+/* ainzy-redeem-card: 含兑换码输入框的「充值」卡改为纯白底，让浅灰输入框有对比 */
+html.font-inter :where([data-slot='card'],.bg-card):has(#redemption-code){background-color:#fff!important}
+html.dark.font-inter :where([data-slot='card'],.bg-card):has(#redemption-code){background-color:#141416!important}
+#redemption-code{background-color:#eeeef0!important;border-color:#dcdce0!important}
+/* ainzy-ref-desc: 推荐计划卡副标题保持一行——宽屏时文字列多分宽度并禁止换行 */
+@media (min-width:1024px){
+  #wallet-affiliate .ainzy-aurora [data-slot="card-content"],#wallet-affiliate .ainzy-aurora > .grid{grid-template-columns:minmax(300px,1.35fr) minmax(150px,.5fr) minmax(260px,.95fr)!important}
+}
+@media (min-width:1200px){
+  #wallet-affiliate .ainzy-aurora [data-slot="card-content"] h3 + p,#wallet-affiliate .ainzy-aurora > .grid h3 + p{display:block!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;-webkit-line-clamp:unset}
+}
+
+/* 2026-10-15 模型价格页：头部收紧 + 计费标签统一配色 */
+header:has(input[placeholder*="搜索模型"]),header:has(input[placeholder*="earch model"]){padding-top:0!important;margin-bottom:18px!important}
+header:has(input[placeholder*="搜索模型"]) h1,header:has(input[placeholder*="earch model"]) h1{font-size:clamp(1.5rem,2.4vw,1.9rem)!important;letter-spacing:-.02em}
+header:has(input[placeholder*="搜索模型"])>p,header:has(input[placeholder*="earch model"])>p{margin-top:6px!important;font-size:13.5px!important}
+header:has(input[placeholder*="搜索模型"])>p+p,header:has(input[placeholder*="earch model"])>p+p{display:none!important}
+header:has(input[placeholder*="搜索模型"])>div,header:has(input[placeholder*="earch model"])>div{margin-top:14px!important}
+div:has(>header input[placeholder*="搜索模型"]),div:has(>header input[placeholder*="earch model"]){padding-top:76px!important}
+
+/* 2026-10-15 页面顶部装饰渐变：原蓝/青/紫 → 站点暖金色 */
+div.pointer-events-none.absolute.inset-x-0.top-0{background-image:radial-gradient(55% 60% at 50% 0%,rgba(196,158,72,.55) 0%,transparent 70%),radial-gradient(35% 40% at 88% 8%,rgba(226,196,128,.45) 0%,transparent 70%),radial-gradient(30% 35% at 10% 12%,rgba(214,206,190,.6) 0%,transparent 70%)!important}
+
+/* 2026-10-15 密钥「…」菜单图标上色 */
+[role="menuitem"] svg.lucide-copy{color:#3b82f6}
+[role="menuitem"] svg.lucide-link{color:#8b5cf6}
+[role="menuitem"] svg.lucide-arrow-right-left{color:#f97316}
+[role="menuitem"] svg.lucide-message-square,[role="menuitem"] svg.lucide-message-circle,[role="menuitem"] svg.lucide-bot{color:#10b981}
+[role="menuitem"]:has(svg.lucide-copy) svg:first-child,[role="menuitem"]:has(svg.lucide-link) svg:first-child{opacity:1}
+
+/* 2026-10-15 提示框（toast）美化：白色玻璃卡 + 左侧色条 + 圆形图标底；成功提示用小球笑脸 */
+[data-sonner-toaster] [data-sonner-toast][data-styled="true"]{--az-tc:#16a34a;background:color-mix(in srgb,var(--popover,#fff) 92%,transparent)!important;color:var(--foreground)!important;
+  border:1px solid color-mix(in srgb,var(--az-tc) 22%,var(--border,#e7e5e4))!important;border-radius:16px!important;padding:13px 16px 13px 14px!important;gap:12px!important;
+  box-shadow:inset 3px 0 0 var(--az-tc),0 22px 44px -22px rgba(28,25,23,.42),0 3px 10px -4px rgba(28,25,23,.12)!important;
+  -webkit-backdrop-filter:blur(16px) saturate(170%);backdrop-filter:blur(16px) saturate(170%);justify-content:flex-start!important;font-family:inherit}
+[data-sonner-toaster] [data-sonner-toast][data-styled="true"][data-type="error"]{--az-tc:#dc2626}[data-sonner-toaster] [data-sonner-toast][data-styled="true"][data-type="warning"]{--az-tc:#d97706}[data-sonner-toaster] [data-sonner-toast][data-styled="true"][data-type="info"],[data-sonner-toaster] [data-sonner-toast][data-styled="true"][data-type="loading"]{--az-tc:#2563eb}
+[data-sonner-toast][data-styled="true"] [data-icon]{width:30px!important;height:30px!important;margin:0!important;border-radius:50%;flex:none;display:grid!important;place-items:center;
+  color:var(--az-tc)!important;background:color-mix(in srgb,var(--az-tc) 13%,transparent)}
+[data-sonner-toast][data-styled="true"] [data-icon] svg{width:17px;height:17px}
+[data-sonner-toast][data-type="success"] [data-icon]{background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96'%3E%3Ccircle cx='48' cy='48' r='44' fill='%231c1917'/%3E%3Cpath d='M28 46q8-10 16 0M52 46q8-10 16 0' fill='none' stroke='%23fff' stroke-width='6' stroke-linecap='round'/%3E%3Cellipse cx='48' cy='64' rx='7' ry='4.5' fill='%23f5b5a8'/%3E%3C/svg%3E") center/100% no-repeat!important;animation:az-toast-hop .6s cubic-bezier(.3,1.5,.5,1) .1s both}
+[data-sonner-toast][data-type="success"] [data-icon] svg{display:none}
+@keyframes az-toast-hop{0%{transform:translateY(-10px) scale(.6)}60%{transform:translateY(2px) scale(1.08,.92)}100%{transform:none}}
+[data-sonner-toast][data-styled="true"] [data-title]{font-size:14.5px!important;font-weight:650!important;letter-spacing:-.01em;color:var(--foreground)!important}
+[data-sonner-toast][data-styled="true"] [data-description]{font-size:12.5px!important;color:var(--muted-foreground)!important}
+[data-sonner-toast][data-styled="true"] [data-close-button]{left:auto!important;right:-6px!important;top:-6px!important;transform:none!important;width:22px!important;height:22px!important;
+  background:var(--popover,#fff)!important;border:1px solid var(--border,#e7e5e4)!important;color:var(--muted-foreground)!important;box-shadow:0 2px 6px rgba(0,0,0,.08)}
+
+/* 2026-10-16 创建/编辑 API 密钥弹窗：分组按钮不再撑破宽度；说明两行内换行；整体卡片化 */
+button[data-auto-group-effect="trigger"]{min-width:0!important;max-width:100%!important;white-space:normal!important;border-radius:14px!important}
+button[data-auto-group-effect="trigger"] .truncate{white-space:normal!important;overflow:hidden;text-overflow:clip;display:-webkit-box!important;-webkit-box-orient:vertical;-webkit-line-clamp:2}
+button[data-auto-group-effect="trigger"] .truncate.font-medium{font-size:14.5px;font-weight:650;-webkit-line-clamp:1}
+button[data-auto-group-effect="trigger"] .text-muted-foreground{margin-top:3px;line-height:1.45}
+form.overflow-y-auto{overflow-x:hidden!important}
+form.overflow-y-auto section{border-radius:16px}
+form.overflow-y-auto input,form.overflow-y-auto [role="combobox"]:not([data-auto-group-effect]){border-radius:10px!important}
+form.overflow-y-auto label{font-weight:600}
+
+/* 2026-10-16 首页（iframe 内滚动）滚下去后导航栏加毛玻璃底，避免和内容叠字 */
+html.az-home-scrolled header.fixed.inset-x-0.top-0{background:color-mix(in srgb,var(--background) 78%,transparent);
+  -webkit-backdrop-filter:blur(14px) saturate(160%);backdrop-filter:blur(14px) saturate(160%);border-bottom:1px solid color-mix(in srgb,var(--border) 70%,transparent);transition:background .25s}
+
+/* 2026-10-16 手机：左下两个浮动按钮缩成圆形图标，不挡内容 */
+@media (max-width:640px){
+  #ainzy-guide-fab{width:38px!important;height:38px!important;padding:0!important;border-radius:50%!important;justify-content:center!important;overflow:hidden;font-size:0!important;gap:0!important}
+  #ainzy-guide-fab>*:not(svg):not(:first-child){display:none!important}
+  #ainzy-guide-fab svg{width:17px;height:17px}
+  html body #az-cs>button.fab{font-size:0!important;gap:0!important;padding:0!important;width:42px!important;height:42px!important;border-radius:50%!important;justify-content:center!important}
+  html body #az-cs>button.fab .cs-ic{display:none!important}
+}
+
+/* 2026-10-16 客服面板：底部重复的「转人工」去掉（头部已有）；清空对话靠右 */
+#az-cs .ft .hum-t{display:none!important}
+#az-cs .ft{justify-content:flex-end!important}
+#az-cs textarea::placeholder{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* 2026-10-16 logo 换成小黑球：页头圆形不裁切 */
+img[src*="/logo.png"]{border-radius:50%!important}
+
+/* 2026-10-16 品牌字体统一：拉丁字母（标题/品牌名/数字）用 Space Grotesk，与首页一致；中文仍走 AZ Noto Sans SC（unicode-range 只覆盖拉丁） */
+@font-face{font-family:"AZ Brand";font-style:normal;font-weight:300 700;font-display:swap;src:url(/mobai/media/vendor/fonts/spacegrotesk-latin.woff2) format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+20AC,U+2122,U+2212}
+header a[href="/"] span.font-semibold{font-family:"AZ Brand","AZ Noto Sans SC",sans-serif!important;font-size:15px!important;font-weight:600!important;letter-spacing:-.01em}
+main h1,#root h1{font-family:"AZ Brand","AZ Noto Sans SC",sans-serif;letter-spacing:-.02em}
+
+/* 2026-10-16 手机：控制台顶栏挤出屏幕（头像、铃铛被推到右边外面）。搜索框缩成图标，品牌字收小 */
+@media (max-width:640px){
+  header button[aria-label="搜索"],header button[aria-label="Search"]{width:36px!important;min-width:36px!important;padding:0!important;justify-content:center!important;flex:none!important}
+  header button[aria-label="搜索"]>*:not(svg),header button[aria-label="Search"]>*:not(svg),header button[aria-label="搜索"] kbd,header button[aria-label="Search"] kbd{display:none!important}
+  header a[href="/"] span.font-semibold{font-size:14px!important}
+  header .ms-auto{gap:2px!important;min-width:0}
+  html,body{overflow-x:hidden}
+  main table{font-size:12.5px}
+}
+
+/* 2026-10-16 性能：控制台主体里的毛玻璃全部去掉——卡片背后是纯色底，模糊看不出效果，却让每次滚动都要重算。顶栏保留（下面有内容滚过）。 */
+main *,main{-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+
+/* 2026-10-16 价格页：客户选不到的内部分组（用类隐藏，避免被其它脚本改回 style） */
+.az-hide-g{display:none!important}
+
+/* 2026-10-16 分组按钮上「自动 倍率」小标签去掉（说明里已写清） */
+[data-auto-group-effect="trigger"] [data-auto-group-frame]{display:none!important}
+
+/* 2026-10-17 描边加粗：Windows 125% 缩放下 1px 被取整成 0.8px 显得发虚；
+   1.6px 在 1x/1.25x/1.5x 都落到整数物理像素（1/2/2 px），2x 屏为 3px。
+   只动四周描边的圆角组件（胶囊/输入框/按钮/卡片），表格行分隔线不动。 */
+[class~="border"]:is([class*="rounded"]){border-width:1.6px}
+/* 2026-10-17 质感微调：胶囊/按钮顶部高光+极淡落影；含表格/输入的大卡片柔和浮起；表头弱化突出数据 */
+html.light :is(button,span)[class~="border"]:is([class*="rounded"]):not([class*="border-transparent"]){box-shadow:inset 0 1px 0 rgb(255 255 255/.8),0 1px 2px rgb(28 25 23/.07)}
+html.light div[class~="border"][class*="rounded"]:has(table,input){box-shadow:0 1px 2px rgb(28 25 23/.05),0 10px 30px -14px rgb(28 25 23/.16)!important}
+[data-slot=table] th{color:var(--muted-foreground)!important;font-weight:600!important;letter-spacing:.02em}
+
+
+/* 10-20 手机端细节（只作用于 <768px）：
+   1) 概览顶部三格：桌面版给的 26px 左右内边距在手机上把内容挤到 55px，标题和「1 杯精品咖啡」被截断
+   2) 成功率格子 2px 左边距、吞吐量 10px，竖排后没对齐
+   3) 小黑球固定在左下角，页面底部没留白会一直盖住最后一屏
+   4) 使用日志筛选栏按钮总宽 343 > 容器 326，靠右对齐时溢出到左边贴边
+   用 #root 开头是为了压过 html.az-p-dashboard×N 的高权重规则 */
+@media (max-width:767px){
+html.az-p-dashboard #root main .grid.grid-cols-3[class*="gap-1.5"]>*{padding:7px 8px!important}
+html.az-p-dashboard #root main .grid.grid-cols-3[class*="gap-1.5"]>* .line-clamp-1{-webkit-line-clamp:2!important;line-clamp:2!important;white-space:normal!important}
+html.az-p-dashboard #root main .az-stk-mini{max-width:100%!important;box-sizing:border-box!important;overflow:hidden!important;text-overflow:ellipsis!important;font-size:10px!important;padding:2px 6px 2px 4px!important}
+html.az-p-dashboard #root main div.grid.grid-cols-3.gap-2>div:has(#az-sgrid){padding:12px 10px 6px!important}
+html:not(.az-p-home) #root main{padding-bottom:64px!important}
+#root main div.flex.items-center.justify-end:has(>.az-moved-ctl){flex-wrap:wrap!important;row-gap:8px!important}
+#root main div.flex.items-center.justify-end>.az-moved-ctl{flex:1 0 100%!important;justify-content:flex-start!important}
+}
+
+/* 2026-10-20 价格卡片：模型名原来单行截断成 "claude-opus-…"，看不出 4.6/4.7/4.8。改成在连字符处换行完整显示（最多两行） */
+html.az-p-pricing #root div.group.relative.flex.flex-col.rounded-xl.border h3.font-mono.truncate{white-space:normal!important;text-overflow:clip!important;overflow:hidden!important;overflow-wrap:anywhere;line-height:1.25!important;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+/* 2026-10-20 价格卡片：名字块原来会被右侧「详情 / 复制」按钮挤到只剩 68px（1280 宽时），改成占满剩余宽度，模型名基本一行放下 */
+html.az-p-pricing #root div.group.relative.flex.flex-col.rounded-xl.border div.flex.items-start.justify-between>div.flex.min-w-0{flex:1 1 auto;min-width:0}
+html.az-p-pricing #root div.group.relative.flex.flex-col.rounded-xl.border div.flex.items-start.justify-between>div.flex.min-w-0>div.min-w-0{flex:1 1 auto;min-width:0}
+html.az-p-pricing #root div.group.relative.flex.flex-col.rounded-xl.border h3.font-mono.truncate{-webkit-line-clamp:3}
+/* 2026-10-20 价格卡片（续）：卡片窄（1280 宽三列时只有 276px）的时候，让右边「详情 / 复制」按钮组换到下一行，名字块至少拿到 160px */
+html.az-p-pricing #root div.group.relative.flex.flex-col.rounded-xl.border div.flex.items-start.justify-between{flex-wrap:wrap;row-gap:6px}
+html.az-p-pricing #root div.group.relative.flex.flex-col.rounded-xl.border div.flex.items-start.justify-between>div.flex.min-w-0{flex:1 1 160px}
+html.az-p-pricing #root div.group.relative.flex.flex-col.rounded-xl.border div.flex.items-start.justify-between>div.shrink-0{margin-left:auto}

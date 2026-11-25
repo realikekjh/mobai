@@ -1,0 +1,56 @@
+#az-boot{position:fixed;inset:0;z-index:2147483600;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;background:#f8f7f5;transition:opacity .38s ease,visibility .38s;animation:az-boot-bail .4s ease 10s forwards}@media (prefers-color-scheme:dark){#az-boot{background:#0c0c0d}}html.dark #az-boot{background:#0c0c0d}html.light #az-boot{background:#f8f7f5}#az-boot.out{opacity:0;visibility:hidden}#az-boot .ring{display:none}#az-boot .lg{position:relative;width:64px;height:64px}#az-boot .lg img,#az-boot .lg canvas{display:block;width:100%;height:100%}#az-boot .lg canvas{position:absolute;inset:0}#az-boot .lg.flowing img{visibility:hidden}@media (prefers-color-scheme:dark){#az-boot .lg img,#az-boot .lg canvas{filter:invert(1) brightness(1.6)}}html.dark #az-boot .lg img,html.dark #az-boot .lg canvas{filter:invert(1) brightness(1.6)}html.light #az-boot .lg img,html.light #az-boot .lg canvas{filter:none}#az-boot .tx{font:600 12px/1 system-ui,-apple-system,"Segoe UI",sans-serif;letter-spacing:.34em;text-indent:.34em;color:#a8a29e;opacity:.85}@keyframes az-boot-bail{to{opacity:0;visibility:hidden}}
+
+/* 2026-10-15 细节优化：柔和径向底色 + 入场 + 呼吸光晕 + 细进度线 + 退场微放大 */
+#az-boot{background:radial-gradient(120% 90% at 50% 42%,#fbfaf8 0%,#f8f7f5 55%,#eeece8 100%)}
+@media (prefers-color-scheme:dark){#az-boot{background:radial-gradient(120% 90% at 50% 42%,#161618 0%,#0c0c0d 58%,#08080a 100%)}}
+html.dark #az-boot{background:radial-gradient(120% 90% at 50% 42%,#161618 0%,#0c0c0d 58%,#08080a 100%)}
+html.light #az-boot{background:radial-gradient(120% 90% at 50% 42%,#fbfaf8 0%,#f8f7f5 55%,#eeece8 100%)}
+#az-boot .lg{animation:az-in .55s cubic-bezier(.2,.8,.2,1) both;transition:transform .38s ease,filter .38s ease}
+#az-boot .lg::before{content:"";position:absolute;inset:-26px;border-radius:50%;z-index:-1;pointer-events:none;background:radial-gradient(circle,rgba(34,197,94,.17) 0%,rgba(34,197,94,.06) 38%,rgba(34,197,94,0) 68%);animation:az-breathe 2.6s ease-in-out infinite}
+#az-boot .tx{position:relative;animation:az-fade .6s ease .12s both}
+#az-boot .tx::after{content:"";position:absolute;left:50%;top:calc(100% + 16px);width:64px;height:2px;margin-left:-32px;border-radius:2px;background:linear-gradient(90deg,rgba(34,197,94,0) 0%,rgba(34,197,94,.85) 50%,rgba(34,197,94,0) 100%) no-repeat,rgba(168,162,158,.22);background-size:45% 100%,100% 100%;animation:az-bar 1.35s cubic-bezier(.45,0,.55,1) infinite}
+#az-boot.out .lg{transform:scale(1.05);filter:blur(1.5px)}
+@keyframes az-in{from{opacity:0;transform:scale(.9)}to{opacity:1;transform:none}}
+@keyframes az-fade{from{opacity:0;transform:translateY(4px)}to{opacity:.85;transform:none}}
+@keyframes az-breathe{0%,100%{opacity:.5;transform:scale(.9)}50%{opacity:1;transform:scale(1.06)}}
+@keyframes az-bar{from{background-position:-70% 0,0 0}to{background-position:170% 0,0 0}}
+@media (prefers-reduced-motion:reduce){#az-boot .lg,#az-boot .tx,#az-boot .lg::before,#az-boot .tx::after{animation:none}}
+
+/* 2026-10-15 开屏小球 + 引言 */
+#az-boot .tx::after{width:120px;margin-left:-60px}
+#az-boot .mb{position:absolute;left:50%;top:calc(50% + 74px);width:18px;height:18px;margin-left:-60px;animation:az-hop 1.35s cubic-bezier(.45,0,.55,1) infinite}
+#az-boot .mb svg{display:block;width:100%;height:100%;animation:az-squash .45s ease-in-out infinite alternate}
+#az-boot .q{position:absolute;left:0;right:0;bottom:12vh;text-align:center;font:italic 400 15px/1.4 "Iowan Old Style","Georgia","Times New Roman",serif;color:#a8a29e;letter-spacing:.02em;
+  animation:az-q 1.2s ease .25s both}
+#az-boot .q span{font-style:normal;font-size:11px;letter-spacing:.24em;display:block;margin-top:8px;opacity:.7;font-family:system-ui,sans-serif}
+@keyframes az-hop{0%{transform:translate(-9px,-22px)}20%{transform:translate(15px,-30px)}45%{transform:translate(48px,-22px)}70%{transform:translate(80px,-30px)}100%{transform:translate(111px,-22px)}}
+@keyframes az-squash{from{transform:scale(1.06,.92)}to{transform:scale(.96,1.05) translateY(-4px)}}
+@keyframes az-q{from{opacity:0;transform:translateX(-24px)}to{opacity:1;transform:none}}
+#az-boot .mb .bd{fill:#1c1917}#az-boot .mb .ey{fill:#f8f7f5}
+@media (prefers-color-scheme:dark){#az-boot .mb .bd{fill:#e7e5e4}#az-boot .mb .ey{fill:#0c0c0d}}
+html.dark #az-boot .mb .bd{fill:#e7e5e4}html.dark #az-boot .mb .ey{fill:#0c0c0d}
+html.light #az-boot .mb .bd{fill:#1c1917}html.light #az-boot .mb .ey{fill:#f8f7f5}
+@media (prefers-reduced-motion:reduce){#az-boot .mb,#az-boot .mb svg{animation:none}}
+
+/* 2026-10-16 logo 已是小黑球：开屏不再放大 logo，只留进度线上蹦的那颗 */
+#az-boot .lg{display:none!important}
+
+/* 2026-10-16 开屏 v3：字母跳跳球 */
+#az-boot .tx.v3{font:700 30px/1 "Space Grotesk","AZ Noto Sans SC",system-ui,sans-serif;letter-spacing:.22em;text-indent:.22em;color:#44403c;opacity:1;display:flex;gap:2px;margin-top:40px}
+#az-boot .tx.v3::after{display:none}
+#az-boot .tx.v3 span{display:inline-block;transform-origin:50% 100%;transition:color .3s}
+#az-boot .tx.v3 span.hit{animation:az-letter .42s cubic-bezier(.3,1.6,.5,1);color:#b8943f}
+@keyframes az-letter{0%{transform:none}25%{transform:translateY(5px) scale(1.12,.82)}60%{transform:translateY(-3px) scale(.96,1.06)}100%{transform:none}}
+#az-boot .mb.v3{position:absolute;left:0;top:0;width:30px;height:30px;margin:0;animation:none;transform-origin:50% 100%;will-change:transform;z-index:2}
+#az-boot .mb.v3 svg{animation:none;overflow:visible}
+#az-boot .mb.v3 .eyes{transition:transform .18s ease;transform-box:fill-box;transform-origin:center}
+#az-boot .sh{position:absolute;left:0;top:0;width:28px;height:6px;border-radius:50%;background:radial-gradient(closest-side,rgba(28,25,23,.55),rgba(28,25,23,0));pointer-events:none;will-change:transform,opacity}
+#az-boot .q{bottom:14vh}
+@media (prefers-color-scheme:dark){#az-boot .tx.v3{color:#d6d3d1}#az-boot .sh{background:radial-gradient(closest-side,rgba(0,0,0,.7),rgba(0,0,0,0))}}
+html.dark #az-boot .tx.v3{color:#d6d3d1}
+html.light #az-boot .tx.v3{color:#44403c}
+@media (max-width:640px){#az-boot .tx.v3{font-size:24px}}
+
+/* 2026-10-16 开屏字母与首页标题同一字体 */
+@font-face{font-family:"AZ Brand";font-style:normal;font-weight:300 700;font-display:block;src:url(/mobai/media/vendor/fonts/spacegrotesk-latin.woff2) format("woff2");unicode-range:U+0000-00FF}
+#az-boot .tx.v3{font-family:"AZ Brand","Space Grotesk",system-ui,sans-serif!important}
