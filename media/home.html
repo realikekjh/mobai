@@ -524,8 +524,8 @@ html.dark .wi.mono,html.dark .vi.mono{filter:invert(1)}
     <h1><span class="hl hl1">One key for</span><span class="hl hl2"><span class="rot" aria-live="polite"><span class="w" style="--wc:#c96442">Claude</span></span><span class="dot">.</span></span></h1><!-- ainzy-hero-3lines -->
     <!-- ainzy-hero-sub2 -->
     <div class="cta-row">
-      <a class="btn-primary" id="az-hero-start" href="/sign-in" target="_top"><span class="hb" aria-hidden="true"><svg viewBox="0 0 96 96"><circle class="bd" cx="48" cy="48" r="42"/><g class="eyes"><ellipse class="ey" cx="38" cy="44" rx="6" ry="8"/><ellipse class="ey" cx="60" cy="44" rx="6" ry="8"/></g></svg></span>免费注册 · Sign up free →</a>
-      <a class="az-hero-login" id="az-hero-login" href="/sign-in" target="_top">已有账号？登录 · Sign in</a><!-- 2026-11-12 n-12 -->
+      <a class="btn-primary" id="az-hero-start" href="/mobai/sign-in" target="_top"><span class="hb" aria-hidden="true"><svg viewBox="0 0 96 96"><circle class="bd" cx="48" cy="48" r="42"/><g class="eyes"><ellipse class="ey" cx="38" cy="44" rx="6" ry="8"/><ellipse class="ey" cx="60" cy="44" rx="6" ry="8"/></g></svg></span>免费注册 · Sign up free →</a>
+      <a class="az-hero-login" id="az-hero-login" href="/mobai/sign-in" target="_top">已有账号？登录 · Sign in</a><!-- 2026-11-12 n-12 -->
     </div>
   </section>
   <div class="orbit-stage" id="orbit"><div class="globe-wrap" aria-hidden="true"><canvas id="globe"></canvas></div></div>
@@ -543,7 +543,7 @@ html.dark .wi.mono,html.dark .vi.mono{filter:invert(1)}
     <div class="section-head reveal io"><h2>三步开始用</h2><p>注册、充值，然后在控制台点「开始使用」 · Sign up, add credit, get started.</p></div>
     <div class="aj" id="aj">
       <div class="aj-rail" aria-hidden="true"><div class="aj-fill"></div><div class="aj-bot"><div class="aj-think"><i></i><i></i><i></i></div><svg viewBox="0 0 96 96"><circle class="bd" cx="48" cy="48" r="42" fill="#0a0a0b"/><g class="eyes"><ellipse cx="38" cy="44" rx="6" ry="8" fill="#fafafa"/><ellipse cx="60" cy="44" rx="6" ry="8" fill="#fafafa"/></g></svg></div></div>
-      <a class="aj-stop reveal io" href="/sign-in" target="_top" data-i="0">
+      <a class="aj-stop reveal io" href="/mobai/sign-in" target="_top" data-i="0">
         <span class="aj-dot" aria-hidden="true"></span>
         <div class="aj-card">
           <div class="aj-vis v-mail" aria-hidden="true">
@@ -558,7 +558,7 @@ html.dark .wi.mono,html.dark .vi.mono{filter:invert(1)}
           <span class="aj-go">去注册 →</span>
         </div>
       </a>
-      <a class="aj-stop reveal io" href="/wallet" target="_top" data-i="1">
+      <a class="aj-stop reveal io" href="/mobai/wallet" target="_top" data-i="1">
         <span class="aj-dot" aria-hidden="true"></span>
         <div class="aj-card">
           <div class="aj-vis v-wal" aria-hidden="true">
@@ -573,7 +573,7 @@ html.dark .wi.mono,html.dark .vi.mono{filter:invert(1)}
           <span class="aj-go">去充值 →</span>
         </div>
       </a>
-      <a class="aj-stop reveal io" href="/dashboard/overview?start=1" target="_top" data-i="2">
+      <a class="aj-stop reveal io" href="/mobai/dashboard/overview?start=1" target="_top" data-i="2">
         <span class="aj-dot" aria-hidden="true"></span>
         <div class="aj-card">
           <div class="aj-vis v-term" aria-hidden="true">
@@ -588,7 +588,7 @@ html.dark .wi.mono,html.dark .vi.mono{filter:invert(1)}
         </div>
       </a>
     </div>
-    <div class="ss-cta reveal io"><a class="ss-link" href="/docs/" target="_top">查看完整使用指南 · Full guide →</a></div>
+    <div class="ss-cta reveal io"><a class="ss-link" href="/mobai/docs/" target="_top">查看完整使用指南 · Full guide →</a></div>
   </section>
 
   <section class="section az3-n">
@@ -660,7 +660,7 @@ html.dark .wi.mono,html.dark .vi.mono{filter:invert(1)}
   </section>
 
 
-  <footer class="az-foot"><span>© 2026 沫白 API</span><i></i><a href="/docs/" target="_top">使用指南</a><i></i><a href="/ccswitch/" target="_top">CC Switch 接入教程</a><i></i><a href="/pricing" target="_top">模型价格</a><i></i><a href="#" target="_blank" rel="noopener">联系我们 · 沫白 · Contact</a></footer>
+  <footer class="az-foot"><span>© 2026 沫白 API</span><i></i><a href="/mobai/docs/" target="_top">使用指南</a><i></i><a href="/mobai/ccswitch/" target="_top">CC Switch 接入教程</a><i></i><a href="/mobai/pricing" target="_top">模型价格</a><i></i><a href="#" target="_blank" rel="noopener">联系我们 · 沫白 · Contact</a></footer>
 </div>
 
 <script>
@@ -1001,7 +1001,7 @@ html.dark .wi.mono,html.dark .vi.mono{filter:invert(1)}
       var b = document.getElementById('az-hero-start'); if (!b) return;
       var p = window.parent && window.parent !== window ? window.parent : null;
       var logged = !!(p && p.__azAuth && p.__azAuth());
-      var want = logged ? '/dashboard/overview?start=1' : '/register';
+      var want = logged ? '/mobai/dashboard/overview?start=1' : '/mobai/register';
       if (b.getAttribute('href') !== want) b.setAttribute('href', want);
       var l = document.getElementById('az-hero-login'); if (l) l.style.display = logged ? 'none' : '';
     } catch (e) {}
@@ -1100,7 +1100,7 @@ html.dark .wi.mono,html.dark .vi.mono{filter:invert(1)}
     try{var top=window.top, fr=window.frameElement.getBoundingClientRect(), hb=b.querySelector('.hb').getBoundingClientRect();
       top.__azBallFrom={x:fr.left+hb.left+hb.width/2,y:fr.top+hb.top+hb.height/2,d:hb.width*84/96,t:Date.now()};
       e.preventDefault(); b.querySelector('.hb').style.visibility='hidden';
-      top.history.pushState(null,'','/sign-up'); top.dispatchEvent(new PopStateEvent('popstate',{state:null}));
+      top.history.pushState(null,'','/mobai/sign-up'); top.dispatchEvent(new PopStateEvent('popstate',{state:null}));
       setTimeout(function(){b.querySelector('.hb').style.visibility=''},1500);
     }catch(x){}});})();
 </script>
